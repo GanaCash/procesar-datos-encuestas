@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Wall with Local Points</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #points-display {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: 0;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Survey Wall</h1>
+    <div id="points-display">Points: <span id="points">0</span></div>
+    <button onclick="redirectToSurvey()">Go to Survey Wall</button>
+    <div id="survey-container" style="display: none;">
+        <iframe id="survey-iframe" scrolling="yes" frameborder="0"></iframe>
+    </div>
+
+    <script>
+        // Inicializa puntos desde localStorage
+        let points = localStorage.getItem('userPoints') ? parseInt(localStorage.getItem('userPoints')) : 0;
+        document.getElementById('points').textContent = points;
+
+        // Función para actualizar puntos en localStorage y UI
+        function updatePoints(newPoints) {
+            points += parseInt(newPoints);
+            document.getElementById('points').textContent = points;
+            localStorage.setItem('userPoints', points);
+        }
+
+        // Carga el survey wall
+        function redirectToSurvey() {
+            const apiKey = '67e470e4062c6323316149'; // Tu API Key
+            const userId = 'fingerpointjs'; // Tu User ID
+            const surveyUrl = `https://earn.wannads.com/wall?apiKey=${apiKey}&userId=${userId}`;
+
+            document.getElementById('survey-iframe').src = surveyUrl;
+            document.getElementById('survey-container').style.display = 'block';
+            document.querySelector('button').style.display = 'none';
+        }
+
+        // Escucha actualizaciones del postback (polling simple para demo)
+        async function checkForPoints() {
+            const response = await fetch('/.netlify/functions/postback-check?userId=fingerpointjs');
+            const data = await response.json();
+            if (data.amount) {
+                updatePoints(data.amount);
+                alert(`¡Ganaste ${data.amount} puntos!`);
+            }
+        }
+
+        // Revisa cada 10 segundos (simula espera de postback)
+        setInterval(checkForPoints, 10000);
+    </script>
+</body>
+</html>
