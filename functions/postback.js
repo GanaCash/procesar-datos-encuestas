@@ -25,19 +25,15 @@ exports.handler = async (event) => {
 
     if (signature !== expectedSignature) {
         console.log('Invalid signature:', { received: signature, expected: expectedSignature });
-        // Temporalmente, no fallar aquí para depurar
-        // return { statusCode: 400, body: 'ERROR: Invalid signature' };
-    } else {
-        console.log('Signature validated successfully');
+        return { statusCode: 400, body: 'ERROR: Invalid signature' };
     }
 
-    global.pointsData = global.pointsData || {};
-    global.pointsData[userId] = { amount: parseInt(amount), timestamp: Date.now() };
     console.log('Postback processed:', { userId, amount });
 
+    // Redirige al frontend con los puntos
     return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'text/plain' },
-        body: 'OK'
+        statusCode: 302,
+        headers: { 'Location': `/?userId=${userId}&points=${amount}` },
+        body: ''
     };
 };
