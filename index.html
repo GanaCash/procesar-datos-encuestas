@@ -32,22 +32,36 @@
     </div>
 
     <script>
+        // Genera un userId único basado en timestamp y un sufijo aleatorio
+        const generateUserId = () => {
+            const timestamp = Date.now();
+            const randomSuffix = Math.floor(Math.random() * 10000);
+            return `fingerpointjs_${timestamp}_${randomSuffix}`;
+        };
+
+        // Obtiene o genera el userId y lo muestra en consola
+        let userId = localStorage.getItem('userId');
+        if (!userId) {
+            userId = generateUserId();
+            localStorage.setItem('userId', userId);
+        }
+        console.log('User ID:', userId);
+
         // Inicializa puntos desde localStorage
-        let points = localStorage.getItem('userPoints') ? parseInt(localStorage.getItem('userPoints')) : 0;
+        let points = localStorage.getItem(`points_${userId}`) ? parseInt(localStorage.getItem(`points_${userId}`)) : 0;
         document.getElementById('points').textContent = points;
 
         // Función para actualizar puntos en localStorage y UI
         function updatePoints(newPoints) {
             points += parseInt(newPoints);
             document.getElementById('points').textContent = points;
-            localStorage.setItem('userPoints', points);
+            localStorage.setItem(`points_${userId}`, points);
         }
 
-        // Carga el survey wall
+        // Carga el survey wall con el userId generado
         function redirectToSurvey() {
             const apiKey = '67e470e4062c6323316149'; // Tu API Key
-            const userId = 'fingerpointjs'; // Tu User ID
-            const surveyUrl = `https://earn.wannads.com/surveywall?apiKey=${apiKey}&userId=${userId}`;
+            const surveyUrl = `https://earn.wannads.com/wall?apiKey=${apiKey}&userId=${userId}`;
 
             document.getElementById('survey-iframe').src = surveyUrl;
             document.getElementById('survey-container').style.display = 'block';
@@ -56,7 +70,7 @@
 
         // Escucha actualizaciones del postback (polling simple para demo)
         async function checkForPoints() {
-            const response = await fetch('/.netlify/functions/postback-check?userId=fingerpointjs');
+            const response = await fetch(`/.netlify/functions/postback-check?userId=${userId}`);
             const data = await response.json();
             if (data.amount) {
                 updatePoints(data.amount);
@@ -66,8 +80,6 @@
 
         // Revisa cada 10 segundos (simula espera de postback)
         setInterval(checkForPoints, 10000);
-       const userId = 'fingerpointjs';
-console.log(userId);
     </script>
 </body>
 </html>
