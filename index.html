@@ -34,7 +34,7 @@
                     localStorage.setItem('userId', userId);
                     isUserIdReady = true;
                     initializePoints();
-                    startCheckingPoints();
+                    checkForPointsFromUrl();
                 })
                 .catch(error => {
                     console.error('Error generating userId:', error);
@@ -42,13 +42,13 @@
                     localStorage.setItem('userId', userId);
                     isUserIdReady = true;
                     initializePoints();
-                    startCheckingPoints();
+                    checkForPointsFromUrl();
                 });
         } else {
             console.log('Loaded User ID from localStorage:', userId);
             isUserIdReady = true;
             initializePoints();
-            startCheckingPoints();
+            checkForPointsFromUrl();
         }
 
         function initializePoints() {
@@ -87,38 +87,17 @@
             document.querySelector('button').style.display = 'none';
         }
 
-        async function checkForPoints() {
-            if (!isUserIdReady) {
-                console.log('Waiting for userId to be ready...');
-                return;
-            }
-            try {
-                console.log('Checking for points with userId:', userId);
-                const response = await fetch(`/.netlify/functions/postback-check?userId=${userId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log('Response from postback-check:', data);
-                if (data.amount > 0) {
-                    updatePoints(data.amount);
-                    alert(`¡Ganaste ${data.amount} puntos!`);
-                } else {
-                    console.log('No new points found');
-                }
-            } catch (error) {
-                console.error('Error checking for points:', error);
-            }
-        }
+        function checkForPointsFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pointsFromUrl = urlParams.get('points');
+            const userIdFromUrl = urlParams.get('userId');
+            console.log('URL parameters:', { userIdFromUrl, pointsFromUrl });
 
-        function startCheckingPoints() {
-            setInterval(checkForPoints, 5000);
-            console.log('Interval started for checkForPoints');
+            if (pointsFromUrl && userIdFromUrl === userId) {
+                updatePoints(parseInt(pointsFromUrl));
+                // Limpia los parámetros de la URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         }
     </script>
 </body>
