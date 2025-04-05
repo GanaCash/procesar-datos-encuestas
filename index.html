@@ -92,6 +92,9 @@
             try {
                 console.log('Checking for points with userId:', userId);
                 const response = await fetch(`/.netlify/functions/postback-check?userId=${userId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
                 console.log('Response from postback-check:', data);
                 if (data.amount > 0) {
