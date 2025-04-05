@@ -21,45 +21,81 @@
 
     <script>
         let userId;
-        FingerprintJS.load()
-            .then(fp => fp.get())
-            .then(result => {
-                userId = result.visitorId;
-                console.log('User ID:', userId);
-                localStorage.setItem('userId', userId);
-                initializePoints();
-            });
+
+        // Carga el userId desde localStorage o genera uno nuevo con FingerprintJS
+        userId = localStorage.getItem('userId');
+        if (!userId) {
+            FingerprintJS.load()
+                .then(fp => fp.get())
+                .then(result => {
+                    userId = result.visitorId;
+                    console.log('Generated User ID:', userId);
+                    localStorage.setItem('userId', userId);
+                    initializePoints();
+                })
+                .catch(error => {
+                    console.error('Error generating userId:', error);
+                    userId = 'default-user-id'; // Fallback en caso de error
+                    localStorage.setItem('userId', userId);
+                    initializePoints();
+                });
+        } else {
+            console.log('Loaded User ID from localStorage:', userId);
+            initializePoints();
+        }
 
         function initializePoints() {
-            let points = localStorage.getItem(`points_${userId}`) ? parseInt(localStorage.getItem(`points_${userId}`)) : 0;
+            const points = localStorage.getItem(`points_${userId}`) ? parseInt(localStorage.getItem(`points_${userId}`)) : 0;
+            console.log('Initial points:', points);
             document.getElementById('points').textContent = points;
         }
 
         function updatePoints(newPoints) {
             let points = localStorage.getItem(`points_${userId}`) ? parseInt(localStorage.getItem(`points_${userId}`)) : 0;
             points += parseInt(newPoints);
+            console.log('Updating points:', points);
             document.getElementById('points').textContent = points;
             localStorage.setItem(`points_${userId}`, points);
+            console.log('Points saved to localStorage:', localStorage.getItem(`points_${userId}`));
         }
 
         function redirectToSurvey() {
+            if (!userId) {
+                console.error('userId not ready yet');
+                return;
+            }
             const apiKey = '67e470e4062c6323316149';
             const surveyUrl = `https://earn.wannads.com/wall?apiKey=${apiKey}&userId=${userId}`;
+            console.log('Loading survey URL:', surveyUrl);
             document.getElementById('survey-iframe').src = surveyUrl;
             document.getElementById('survey-container').style.display = 'block';
             document.querySelector('button').style.display = 'none';
         }
 
         async function checkForPoints() {
-            const response = await fetch(`/.netlify/functions/postback-check?userId=${userId}`);
-            const data = await response.json();
-            if (data.amount > 0) {
-                updatePoints(data.amount);
-                alert(`¡Ganaste ${data.amount} puntos!`);
+            if (!userId) {
+                console.log('Waiting for userId to be ready...');
+                return;
+            }
+            try {
+                console.log('Checking for points with userId:', userId);
+                const response = await fetch(`/.netlify/functions/postback-check?userId=${userId}`);
+                const data = await response.json();
+                console.log('Response from postback-check:', data);
+                if (data.amount > 0) {
+                    updatePoints(data.amount);
+                    alert(`¡Ganaste ${data.amount} puntos!`);
+                } else {
+                    console.log('No new points found');
+                }
+            } catch (error) {
+                console.error('Error checking for points:', error);
             }
         }
 
+        // Inicia el intervalo para revisar puntos
         setInterval(checkForPoints, 5000);
+        console.log('Interval started for checkForPoints');
     </script>
 </body>
 </html>
