@@ -34,6 +34,7 @@
                     localStorage.setItem('userId', userId);
                     isUserIdReady = true;
                     initializePoints();
+                    startCheckingPoints();
                 })
                 .catch(error => {
                     console.error('Error generating userId:', error);
@@ -41,11 +42,13 @@
                     localStorage.setItem('userId', userId);
                     isUserIdReady = true;
                     initializePoints();
+                    startCheckingPoints();
                 });
         } else {
             console.log('Loaded User ID from localStorage:', userId);
             isUserIdReady = true;
             initializePoints();
+            startCheckingPoints();
         }
 
         function initializePoints() {
@@ -91,7 +94,12 @@
             }
             try {
                 console.log('Checking for points with userId:', userId);
-                const response = await fetch(`/.netlify/functions/postback-check?userId=${userId}`);
+                const response = await fetch(`/.netlify/functions/postback-check?userId=${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -108,8 +116,10 @@
             }
         }
 
-        setInterval(checkForPoints, 5000);
-        console.log('Interval started for checkForPoints');
+        function startCheckingPoints() {
+            setInterval(checkForPoints, 5000);
+            console.log('Interval started for checkForPoints');
+        }
     </script>
 </body>
 </html>
