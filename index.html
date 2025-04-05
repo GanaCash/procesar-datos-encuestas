@@ -61,7 +61,7 @@
         // Carga el survey wall con el userId generado
         function redirectToSurvey() {
             const apiKey = '67e470e4062c6323316149'; // Tu API Key
-            const surveyUrl = `https://earn.wannads.com/wall?apiKey=${apiKey}&userId=${userId}`;
+            const surveyUrl = `https://earn.wannads.com/surveywall?apiKey=${apiKey}&userId=${userId}`;
 
             document.getElementById('survey-iframe').src = surveyUrl;
             document.getElementById('survey-container').style.display = 'block';
