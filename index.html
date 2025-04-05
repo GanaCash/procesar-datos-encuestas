@@ -70,7 +70,7 @@
 
         // Escucha actualizaciones del postback (polling simple para demo)
         async function checkForPoints() {
-            const response = await fetch(`/.netlify/functions/postback-check?userId=${userId}`);
+            const response = await fetch(`/functions/postback-check?userId=${userId}`);
             const data = await response.json();
             if (data.amount) {
                 updatePoints(data.amount);
