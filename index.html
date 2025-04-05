@@ -24,7 +24,7 @@
         FingerprintJS.load()
             .then(fp => fp.get())
             .then(result => {
-                userId = result.visitorId; // ID único de FingerprintJS
+                userId = result.visitorId;
                 console.log('User ID:', userId);
                 localStorage.setItem('userId', userId);
                 initializePoints();
@@ -59,7 +59,7 @@
             }
         }
 
-        setInterval(checkForPoints, 5000); // Revisa cada 5 segundos
+        setInterval(checkForPoints, 5000);
     </script>
 </body>
 </html>
