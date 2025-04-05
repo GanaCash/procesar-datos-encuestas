@@ -21,6 +21,7 @@
 
     <script>
         let userId;
+        let isUserIdReady = false;
 
         // Carga el userId desde localStorage o genera uno nuevo con FingerprintJS
         userId = localStorage.getItem('userId');
@@ -31,36 +32,47 @@
                     userId = result.visitorId;
                     console.log('Generated User ID:', userId);
                     localStorage.setItem('userId', userId);
+                    isUserIdReady = true;
                     initializePoints();
                 })
                 .catch(error => {
                     console.error('Error generating userId:', error);
                     userId = 'default-user-id';
                     localStorage.setItem('userId', userId);
+                    isUserIdReady = true;
                     initializePoints();
                 });
         } else {
             console.log('Loaded User ID from localStorage:', userId);
+            isUserIdReady = true;
             initializePoints();
         }
 
         function initializePoints() {
+            if (!isUserIdReady) {
+                console.log('Waiting for userId to initialize points...');
+                return;
+            }
             const points = localStorage.getItem(`points_${userId}`) ? parseInt(localStorage.getItem(`points_${userId}`)) : 0;
             console.log('Initial points:', points);
             document.getElementById('points').textContent = points;
         }
 
         function updatePoints(newPoints) {
+            if (!isUserIdReady) {
+                console.log('Cannot update points: userId not ready');
+                return;
+            }
             let points = localStorage.getItem(`points_${userId}`) ? parseInt(localStorage.getItem(`points_${userId}`)) : 0;
             points += parseInt(newPoints);
             console.log('Updating points to:', points);
             localStorage.setItem(`points_${userId}`, points);
             console.log('Points saved to localStorage:', localStorage.getItem(`points_${userId}`));
-            document.getElementById('points').textContent = points; // Asegura que la UI se actualice
+            document.getElementById('points').textContent = points;
         }
 
         function redirectToSurvey() {
-            if (!userId) {
+            if (!isUserIdReady) {
                 console.error('userId not ready yet');
                 return;
             }
@@ -73,7 +85,7 @@
         }
 
         async function checkForPoints() {
-            if (!userId) {
+            if (!isUserIdReady) {
                 console.log('Waiting for userId to be ready...');
                 return;
             }
