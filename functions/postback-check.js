@@ -1,20 +1,12 @@
-let pointsData = {}; // Almacenamiento en memoria (temporal)
-
 exports.handler = async (event) => {
-  const { userId } = event.queryStringParameters || {};
+    const { userId } = event.queryStringParameters || {};
+    global.pointsData = global.pointsData || {};
 
-  if (!userId || !pointsData[userId]) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ amount: 0 }),
-    };
-  }
+    if (!userId || !global.pointsData[userId]) {
+        return { statusCode: 200, body: JSON.stringify({ amount: 0 }) };
+    }
 
-  const data = pointsData[userId];
-  delete pointsData[userId]; // Limpia después de entregar
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ amount: data.amount }),
-  };
+    const data = global.pointsData[userId];
+    delete global.pointsData[userId]; // Limpia después de entregar
+    return { statusCode: 200, body: JSON.stringify({ amount: data.amount }) };
 };
