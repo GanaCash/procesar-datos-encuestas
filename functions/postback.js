@@ -1,31 +1,31 @@
 const crypto = require('crypto');
 
 exports.handler = async (event) => {
-    // Extrae parámetros
+    console.log('Postback function invoked:', event);
+
     const params = event.queryStringParameters || {};
     const userId = params.userId || params.subId;
     const amount = params.amount || params.reward;
     const signature = params.signature;
-    const clientIp = event.headers['client-ip'] || event.requestContext?.identity?.sourceIp || 'Unknown';
+    const clientIp = event.headers['x-forwarded-for']?.split(',')[0] || event.requestContext?.identity?.sourceIp || 'Unknown';
 
-    // Log the incoming IP for debugging
     console.log('Incoming IP:', clientIp);
+    console.log('Received parameters:', { userId, amount, signature });
 
-    // Temporarily disable IP validation to debug
+    // Re-activa la validación de IP (ajusta según la IP que veas en los logs)
     /*
-    if (clientIp !== '3.22.177.178') {
+    const allowedIps = ['3.22.177.178', 'nueva.ip.aqui'];
+    if (!allowedIps.includes(clientIp)) {
         console.log('Invalid IP:', clientIp);
         return { statusCode: 403, body: 'ERROR: Invalid IP' };
     }
     */
 
-    // Verifica parámetros requeridos
     if (!userId || !amount || !signature) {
         console.log('Missing parameters:', { userId, amount, signature });
         return { statusCode: 400, body: 'ERROR: Missing parameters' };
     }
 
-    // Verifica la firma
     const secret = '461e007d2c';
     const expectedSignature = crypto
         .createHmac('sha256', secret)
@@ -37,12 +37,10 @@ exports.handler = async (event) => {
         return { statusCode: 400, body: 'ERROR: Invalid signature' };
     }
 
-    // Almacena los puntos
     global.pointsData = global.pointsData || {};
     global.pointsData[userId] = { amount: parseInt(amount), timestamp: Date.now() };
     console.log('Postback processed:', { userId, amount });
 
-    // Respuesta exacta que Wannads espera
     return {
         statusCode: 200,
         headers: { 'Content-Type': 'text/plain' },
