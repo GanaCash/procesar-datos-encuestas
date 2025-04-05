@@ -35,7 +35,7 @@
                 })
                 .catch(error => {
                     console.error('Error generating userId:', error);
-                    userId = 'default-user-id'; // Fallback en caso de error
+                    userId = 'default-user-id';
                     localStorage.setItem('userId', userId);
                     initializePoints();
                 });
@@ -53,10 +53,10 @@
         function updatePoints(newPoints) {
             let points = localStorage.getItem(`points_${userId}`) ? parseInt(localStorage.getItem(`points_${userId}`)) : 0;
             points += parseInt(newPoints);
-            console.log('Updating points:', points);
-            document.getElementById('points').textContent = points;
+            console.log('Updating points to:', points);
             localStorage.setItem(`points_${userId}`, points);
             console.log('Points saved to localStorage:', localStorage.getItem(`points_${userId}`));
+            document.getElementById('points').textContent = points; // Asegura que la UI se actualice
         }
 
         function redirectToSurvey() {
@@ -93,7 +93,6 @@
             }
         }
 
-        // Inicia el intervalo para revisar puntos
         setInterval(checkForPoints, 5000);
         console.log('Interval started for checkForPoints');
     </script>
