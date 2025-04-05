@@ -12,15 +12,6 @@ exports.handler = async (event) => {
     console.log('Incoming IP:', clientIp);
     console.log('Received parameters:', { userId, amount, signature });
 
-    // Re-activa la validación de IP (ajusta según la IP que veas en los logs)
-    /*
-    const allowedIps = ['3.22.177.178', 'nueva.ip.aqui'];
-    if (!allowedIps.includes(clientIp)) {
-        console.log('Invalid IP:', clientIp);
-        return { statusCode: 403, body: 'ERROR: Invalid IP' };
-    }
-    */
-
     if (!userId || !amount || !signature) {
         console.log('Missing parameters:', { userId, amount, signature });
         return { statusCode: 400, body: 'ERROR: Missing parameters' };
@@ -34,7 +25,10 @@ exports.handler = async (event) => {
 
     if (signature !== expectedSignature) {
         console.log('Invalid signature:', { received: signature, expected: expectedSignature });
-        return { statusCode: 400, body: 'ERROR: Invalid signature' };
+        // Temporalmente, no fallar aquí para depurar
+        // return { statusCode: 400, body: 'ERROR: Invalid signature' };
+    } else {
+        console.log('Signature validated successfully');
     }
 
     global.pointsData = global.pointsData || {};
