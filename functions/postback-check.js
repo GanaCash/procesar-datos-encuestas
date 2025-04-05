@@ -7,6 +7,6 @@ exports.handler = async (event) => {
     }
 
     const data = global.pointsData[userId];
-    delete global.pointsData[userId];
+
     return { statusCode: 200, body: JSON.stringify({ amount: data.amount }) };
 };
